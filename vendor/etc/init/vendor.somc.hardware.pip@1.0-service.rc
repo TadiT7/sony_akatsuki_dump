@@ -1,0 +1,5 @@
+# Pip service
+service vendor.somc.hardware.pip-1-0 /vendor/bin/hw/vendor.somc.hardware.pip@1.0-service
+    class hal
+    user root
+    group root system

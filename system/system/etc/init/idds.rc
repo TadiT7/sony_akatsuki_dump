@@ -1,0 +1,5 @@
+service idds /system/bin/idds
+    class core
+    user system
+    group system
+    writepid /dev/cpuset/system-background/tasks

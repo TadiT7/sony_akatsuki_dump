@@ -1,0 +1,13 @@
+on post-fs-data
+    # create nd_tsfiles from rc file
+    mkdir /data/system/log/nd_tsfiles 0700 system root
+    chown system root /data/system/log/nd_tsfiles
+    chmod 700 /data/system/log/nd_tsfiles
+
+# NativeDumper
+service nativedumper /system/bin/nativedumper
+    class main
+    user system
+    group root system
+    seclabel u:r:nativedumper:s0
+

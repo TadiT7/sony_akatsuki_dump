@@ -1,0 +1,4 @@
+on partial_dump_dir_complete
+    # Support post_dumper in user variant
+    exec - system system root log radio -- /system/bin/post_dumper
+    rm /data/system/log/kernel/console-ramoops-0

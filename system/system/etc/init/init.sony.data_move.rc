@@ -1,0 +1,25 @@
+# Copyright (C) 2018 Sony Mobile Communications Inc.
+# All rights, including trade secret rights, reserved.
+#
+
+# time daemon
+on boot
+    #copy data/time to data/vendor /time
+    copy /data/time/ats_1 /data/vendor/time/ats_1
+    chown system net_raw /data/vendor/time/ats_1
+    chmod 0600 /data/vendor/time/ats_1
+    rm /data/time/ats_1
+
+    copy /data/time/ats_2 /data/vendor/time/ats_2
+    chown system net_raw /data/vendor/time/ats_2
+    chmod 0600 /data/vendor/time/ats_2
+    rm /data/time/ats_2
+
+    copy /data/time/ats_16 /data/vendor/time/ats_16
+    chown system net_raw /data/vendor/time/ats_16
+    chmod 0600 /data/vendor/time/ats_16
+    rm /data/time/ats_16
+    rmdir /data/time
+
+on property:persist.sys.locale=*
+    setprop persist.vendor.radio.locale ${persist.sys.locale}

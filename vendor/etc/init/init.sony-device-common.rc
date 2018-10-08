@@ -1,0 +1,80 @@
+# Copyright (c) 2017, 2018 Sony Mobile Communications Inc.
+#
+# product common configuration
+#
+
+on early-init
+    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules/ \
+        atmel_mxt640u
+
+on early-init && property:ro.vendor.nfc.ko=*
+    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules/ \
+        ${ro.vendor.nfc.ko}
+
+on post-fs
+    # vr
+    chown system system /sys/devices/dsi_panel_driver/vr_mode
+
+on boot
+    # Reopening touch interrupt after chargemon
+    write /sys/devices/virtual/input/lge_touch/charge_out 1
+
+    # Touch
+    chown system system /sys/devices/virtual/input/lge_touch/glove_mode
+    chmod 0600 /sys/devices/virtual/input/lge_touch/glove_mode
+    restorecon /sys/devices/virtual/input/lge_touch/glove_mode
+    chown system system /sys/devices/virtual/input/lge_touch/aod_mode
+    chmod 0600 /sys/devices/virtual/input/lge_touch/aod_mode
+    restorecon /sys/devices/virtual/input/lge_touch/aod_mode
+    chown system system /sys/devices/virtual/input/lge_touch/cover_mode
+    chmod 0600 /sys/devices/virtual/input/lge_touch/cover_mode
+    restorecon /sys/devices/virtual/input/lge_touch/cover_mode
+    chown system system /sys/devices/virtual/input/lge_touch/stamina_mode
+    chmod 0600 /sys/devices/virtual/input/lge_touch/stamina_mode
+    restorecon /sys/devices/virtual/input/lge_touch/stamina_mode
+    chown system system /sys/devices/virtual/input/lge_touch/power_control
+    chmod 0600 /sys/devices/virtual/input/lge_touch/power_control
+    restorecon /sys/devices/virtual/input/lge_touch/power_control
+    chown system system /sys/devices/virtual/input/lge_touch/sidekey_status
+    chmod 0660 /sys/devices/virtual/input/lge_touch/sidekey_status
+    restorecon /sys/devices/virtual/input/lge_touch/sidekey_status
+    chown system system /sys/devices/virtual/input/lge_touch/register_r
+    chmod 0600 /sys/devices/virtual/input/lge_touch/register_r
+    restorecon /sys/devices/virtual/input/lge_touch/register_r
+    chown system system /sys/devices/virtual/input/lge_touch/register_w
+    chmod 0600 /sys/devices/virtual/input/lge_touch/register_w
+    restorecon /sys/devices/virtual/input/lge_touch/register_w
+
+# Cover mode
+    chown system system /sys/devices/virtual/input/clearpad/cover_mode_enabled
+    chown system system /sys/devices/virtual/input/clearpad/cover_win_bottom
+    chown system system /sys/devices/virtual/input/clearpad/cover_win_left
+    chown system system /sys/devices/virtual/input/clearpad/cover_win_right
+    chown system system /sys/devices/virtual/input/clearpad/cover_win_top
+
+# Touch
+on property:dev.bootcomplete=1 && property:vendor.cover_state=*
+    write /sys/devices/common_touch/touch/cover_status ${vendor.cover_state}
+
+on property:vendor.smartstamina.touchreport=*
+   write /sys/devices/common_touch/touch/stamina_mode ${vendor.smartstamina.touchreport}
+
+on property:vendor.backlight_on=*
+    write /sys/devices/common_touch/touch/irq_enable ${vendor.backlight_on}
+
+# Display
+on property:vendor.enable.always_on_display=0 && property:vendor.backlight_on=1
+    write /sys/devices/dsi_panel_driver/aod_mode 0
+    write /sys/devices/common_touch/touch/aod_mode 0
+    write /sys/devices/common_touch/touch/lpwg_notify "9 0"
+
+on property:vendor.enable.always_on_display=1 && property:vendor.backlight_on=1
+    write /sys/devices/dsi_panel_driver/aod_mode 1
+    write /sys/devices/common_touch/touch/aod_mode 1
+    write /sys/devices/common_touch/touch/lpwg_notify "9 1"
+
+on property:dev.bootcomplete=1 && property:vendor.wireless_charging=0
+    write /sys/devices/virtual/input/lge_touch/sidekey_status 5
+
+on property:dev.bootcomplete=1 && property:vendor.wireless_charging=1
+    write /sys/devices/virtual/input/lge_touch/sidekey_status 4

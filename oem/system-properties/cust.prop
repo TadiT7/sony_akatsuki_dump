@@ -1,0 +1,22 @@
+ro.build.description=H8416-user 9 52.0.A.1.220 770342611 release-keys
+
+ro.product.brand=Sony
+ro.product.vendor.brand=Sony
+ro.product.name=H8416
+ro.product.vendor.name=H8416
+ro.product.device=H8416
+ro.product.vendor.device=H8416
+ro.build.version.incremental=770342611
+ro.build.tags=release-keys
+ro.build.fingerprint=Sony/H8416/H8416:9/52.0.A.1.220/770342611:user/release-keys
+ro.vendor.build.fingerprint=Sony/H8416/H8416:9/52.0.A.1.220/770342611:user/release-keys
+ro.bootimage.build.fingerprint=Sony/H8416/H8416:9/52.0.A.1.220/770342611:user/release-keys
+ro.build.thumbprint=9/52.0.A.1.220/770342611:user/release-keys
+
+######################## Customized property values #########################
+ro.semc.version.cust=1316-4520
+ro.semc.version.cust_revision=R11B
+ro.somc.customerid=435
+ro.oem.key1=1316-4520
+#############################################################################
+

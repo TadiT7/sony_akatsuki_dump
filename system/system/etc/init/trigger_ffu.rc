@@ -1,0 +1,30 @@
+service check_update /system/bin/check_update
+    user root
+    group cache system
+    priority -20
+    ioprio rt 0
+    disabled
+    oneshot
+
+service check_ffu /system/bin/check_ffu
+    user root
+    group cache system
+    priority -20
+    ioprio rt 0
+    disabled
+    oneshot
+
+service trigger_ffu /system/bin/trigger_ffu
+    user root
+    group cache system
+    priority -20
+    ioprio rt 0
+    disabled
+    oneshot
+
+on late-fs
+    exec_start check_update
+    exec_start check_ffu
+
+on early-boot && property:somc.ffu.trigger=1
+    exec_start trigger_ffu

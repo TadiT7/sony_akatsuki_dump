@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2018 Sony Mobile Communications Inc.
+    All rights, including trade secret rights, reserved.
+ -->
+<!--
+    This XML file declares which oem system apps should be exempted
+    from the hidden API blacklisting, i.e. which apps should be allowed
+    to access the entire private API.
+
+    An example of hiddenapi-package-whitelist is following:
+
+      <config>
+          <hidden-api-whitelisted-app package="com.android.settings" />
+      </config>
+
+    The xml format of hiddenapi-package-whitelist is following:
+
+     - <config>
+        - It represents list of <hidden-api-whitelisted-app>
+        - It contains some <hidden-api-whitelisted-app>
+
+     - <hidden-api-whitelisted-app package="***">
+        - It represents a setting about one package that wanted to be hidden-api-whitelisted
+        - [package] attribute represents the package name
+           Value : [string]
+ -->
+
+<config>
+  <hidden-api-whitelisted-app package="com.facebook.appmanager" />
+  <hidden-api-whitelisted-app package="com.facebook.services" />
+  <hidden-api-whitelisted-app package="com.facebook.system" />
+  <hidden-api-whitelisted-app package="com.sonyericsson.android.addoncamera.artfilter" />
+  <hidden-api-whitelisted-app package="com.sonyericsson.android.camera" />
+  <hidden-api-whitelisted-app package="com.sonyericsson.conversations" />
+  <hidden-api-whitelisted-app package="com.sonymobile.android.addoncamera.soundphoto" />
+  <hidden-api-whitelisted-app package="com.sonymobile.android.dialer" />
+  <hidden-api-whitelisted-app package="com.sonymobile.ctaserviceacore" />
+  <hidden-api-whitelisted-app package="com.sonymobile.launcher" />
+  <hidden-api-whitelisted-app package="com.sonymobile.smartoptimizer" />
+  <hidden-api-whitelisted-app package="com.sonymobile.storagechecker" />
+  <!-- softbank requirement -->
+  <hidden-api-whitelisted-app package="jp.softbank.mb.ichinaviclt" />
+  <hidden-api-whitelisted-app package="jp.softbank.mb.passwordmanager" />
+  <hidden-api-whitelisted-app package="jp.softbank.mobileid.installer" />
+  <!-- docomo white list apps -->
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.areamail" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.dhome" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.docomoset" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.idmanager" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.kittingmanager" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.lpa" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.mascot" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.pf.dcmwappush" />
+  <hidden-api-whitelisted-app package="com.nttdocomo.android.remotelock" />
+  <hidden-api-whitelisted-app package="jp.co.nttdocomo.lcsapp" />
+  <hidden-api-whitelisted-app package="jp.co.nttdocomo.saigaiban" />
+  <!-- kddi white list apps -->
+  <hidden-api-whitelisted-app package="com.kddi.android.cmail" />
+  <hidden-api-whitelisted-app package="com.kddi.selfcare.client" />
+  <hidden-api-whitelisted-app package="jp.co.disney.apps.base.disneymarketapp" />
+</config>
+

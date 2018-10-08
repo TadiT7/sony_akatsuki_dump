@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2017 Sony Mobile Communications Inc.
+  All rights, including trade secret rights, reserved.
+-->
+
+<config>
+    <!-- These are the standard packages that are white-listed to always have internet
+         access while in power save mode, even if they aren't in the foreground.
+
+         An example of white-listed is following:
+
+         <allow-in-power-save package="com.example.a" />
+          - The packages that are white-listed to be able to run in the
+            background while in power save mode.
+          - The packages that are white-listed to be exempted from Background service
+            restriction after Android O.
+
+         <allow-in-power-save-except-idle package="com.example.b" />
+          - The packages that are white-listed to be able to run in the
+            background while in power save mode.
+            (but not whitelisted from device idle modes)
+    -->
+    <allow-in-power-save package="com.facebook.services" />
+    <allow-in-power-save package="com.sonyericsson.updatecenter" />
+    <allow-in-power-save package="com.sonymobile.dlna" />
+    <allow-in-power-save package="com.sonyericsson.mtp.extension.update" />
+    <allow-in-power-save package="com.sonymobile.mtp.extension.fotaupdate" />
+    <allow-in-power-save package="com.sonyericsson.mtp.extension.backuprestore" />
+    <allow-in-power-save package="com.sonyericsson.mtp" />
+    <allow-in-power-save package="com.sonyericsson.soundenhancement" />
+    <allow-in-power-save package="com.sonymobile.assist" />
+    <allow-in-power-save package="com.sonymobile.intelligent.backlight" />
+    <allow-in-power-save package="com.sonymobile.appprediction" />
+    <allow-in-power-save package="com.android.omadm.service" />
+    <allow-in-power-save package="com.sonymobile.ctaserviceacore" />
+    <allow-in-power-save package="com.sonyericsson.music" />
+
+    <allow-in-power-save-except-idle package="com.facebook.appmanager" />
+    <allow-in-power-save-except-idle package="com.sonymobile.customizationselector" />
+    <allow-in-power-save-except-idle package="com.sonymobile.indeviceintelligence" />
+    <allow-in-power-save-except-idle package="com.sonymobile.xperiaservices" />
+
+    <!-- Whitelist of what components are permitted as backup data transports.  The
+         'service' attribute here is a flattened ComponentName string. -->
+    <backup-transport-whitelisted-service
+        service="com.sonymobile.xperiatransfermobile/.content.sender.extraction.pim.PimExtractor" />
+    <backup-transport-whitelisted-service
+        service="com.sonymobile.synchub/.content.backup.extraction.PimExtractor" />
+</config>

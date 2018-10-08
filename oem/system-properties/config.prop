@@ -1,0 +1,19 @@
+######################## Customized property values #########################
+ro.sys.stamina.active_level=0
+ro.nfc.on.default=true
+ro.nfc.icon.enable=true
+ro.vendor.semc.ecclist.num=3
+ro.vendor.semc.ecclist.type.0=police
+ro.vendor.semc.ecclist.number.0=999
+ro.vendor.semc.ecclist.plmn.0=234 FFF
+ro.vendor.semc.ecclist.type.1=police
+ro.vendor.semc.ecclist.number.1=112
+ro.vendor.semc.ecclist.type.2=police
+ro.vendor.semc.ecclist.number.2=911
+ro.nfc.se.sim.enable=true
+ro.nfc.se.smx.enable=true
+ro.product.locale=en-GB
+ro.telephony.default_network=9
+ro.cst.prm=1316-4520:R11B
+#############################################################################
+

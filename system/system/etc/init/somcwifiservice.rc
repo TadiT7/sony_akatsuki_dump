@@ -1,0 +1,5 @@
+# Copyright (C) 2018 Sony Mobile Communications Inc.
+# All rights, including trade secret rights, reserved.
+
+on boot
+    chown dhcp system /data/misc/dhcp

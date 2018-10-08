@@ -1,0 +1,14 @@
+on early-fs
+    start fsckwait
+
+on post-fs
+    exec u:r:fsckwait:s0 system root system -- /system/bin/fsckwait e
+    rm /data/test_fsckwait
+
+service fsckwait /system/bin/fsckwait s
+    user root
+    group root system graphics
+    disabled
+    oneshot
+    socket fsckwait stream 0660 root root
+    seclabel u:r:fsckwait:s0

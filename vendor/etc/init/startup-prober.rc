@@ -1,0 +1,27 @@
+# Copyright (c) 2018 Sony Mobile Communications Inc.
+#
+# startup-prober setup for Tama
+#
+on post-fs
+    # panel ID
+    chown system system /sys/devices/dsi_panel_driver/panel_id
+    chmod 0440 /sys/devices/dsi_panel_driver/panel_id
+
+on property:sys.boot_completed=1
+   start startup-prober
+
+on property:vendor.idd.startupprober.start=1
+   start startup-prober-newconfig
+   setprop vendor.idd.startupprober.start 0
+
+service startup-prober /vendor/bin/startup-prober
+    user root
+    oneshot
+    disabled
+    group oem_2993 drmrpc system oem_2996
+
+service startup-prober-newconfig /vendor/bin/startup-prober new_configuration
+    user root
+    oneshot
+    disabled
+    group oem_2993 drmrpc system oem_2996

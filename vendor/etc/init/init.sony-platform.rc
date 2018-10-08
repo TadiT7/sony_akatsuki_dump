@@ -1,0 +1,376 @@
+# Copyright (c) 2017 Sony Mobile Communications Inc.
+#
+# init.sony-platform.rc
+#
+
+on early-init
+    
+
+    # Change reset behavior to warm reset
+    
+
+    write /sys/module/msm_rtb/parameters/enable 0
+
+    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules/ \
+        fpc1145_platform \
+        sim_detect \
+        bu520x1nvx \
+        sony_camera \
+        tof_sensor \
+        tcs3490
+
+    write /sys/devices/platform/soc/soc:fpc1145/uevent add
+
+    # change the compression algorithm for zRAM
+    write /sys/block/zram0/comp_algorithm lz4
+
+    # load kernel module to read ufs write/erase count via debugfs
+    
+
+on init
+    # Load persistent dm-verity state
+    verity_load_state
+
+    # SONY: Start the TrimArea Daemon. It must be started before fota-ua
+    wait /dev/block/platform/soc/1d84000.ufshc
+    symlink /dev/block/platform/soc/1d84000.ufshc /dev/block/bootdevice
+    wait /dev/block/sda1
+    chown oem_2997 oem_2997 /dev/block/sda1
+    chmod 0770 /dev/block/sda1
+    class_start trimarea
+    exec u:r:tad:s0 system -- /vendor/bin/wait4tad
+
+    # These are needed for MiscTA HIDL service
+    start hwservicemanager
+    start hidl_memory
+
+    # SONY: checkabortedflash should be started as early as possible.
+    # Dependant on the TrimArea Daemon.
+    exec - root root oem_2993 -- /system/bin/checkabortedflash
+
+    #Enable Bluetooth HFP 1.7
+    setprop ro.bluetooth.hfp.ver 1.7
+
+    # Bluetooth address setting
+    setprop ro.vendor.bt.bdaddr_path "/data/vendor/etc/bluetooth_bdaddr"
+
+    # Enable panic on out of memory
+    
+
+    write /proc/sys/vm/swappiness 100
+# Set SD card clock gating delay to 1ms
+on fs
+    write /sys/devices/platform/soc/8804000.sdhci/mmc_host/mmc0/clkgate_delay 1
+
+# Set bdi ratio to 1 for external sdcard
+on property:sys.boot_completed=1
+    write /sys/class/block/mmcblk0/bdi/max_ratio 1
+
+    # SONY: Enable wakeup irq module
+    write /sys/devices/platform/wakeup_debug.0/enable 1
+
+    # Create directory for hdcp-sdk
+    
+
+on boot
+    chown system system /sys/devices/virtual/water_detection/wdet/wdet_polling_restart
+    chmod 0660 /sys/devices/virtual/water_detection/wdet/wdet_polling_restart
+    chown system audio /sys/class/leds/vibrator/activate
+    chmod 0660 /sys/class/leds/vibrator/activate
+    exec u:r:charge_osv_daemon:s0 root -- /vendor/bin/charge_lrc_osv.sh
+
+# SONY: TrimArea Daemon
+# Last 2 args: start block(blk size 128k), number of blocks(partitionsize(kb)/128(kb))
+service tad /vendor/bin/tad /dev/block/bootdevice/by-name/TA 0,16
+    user oem_2997
+    group oem_2997 root
+    socket tad stream 0660 system oem_2993
+    class trimarea
+    seclabel u:r:tad:s0
+
+on post-fs
+# Display
+    chown system system /sys/devices/dsi_panel_driver/mplus_mode
+    chown system system /sys/devices/dsi_panel_driver/panel_id
+    chown system system /sys/devices/dsi_panel_driver/chargemon_exit
+    chown system system /sys/devices/dsi_panel_driver/area_count
+    chown system system /sys/devices/dsi_panel_driver/c_mode
+
+# backlight
+    chown system system /sys/class/leds/wled/area_count
+    chown system system /sys/class/leds/wled/bl_scale
+    chown system system /sys/class/leds/wled/en_cabc
+
+# led RGB
+    chown system system /sys/class/leds/rgb/sync_state
+    chown system system /sys/class/leds/rgb/start_blink
+    chown system system /sys/class/leds/red/brightness
+    chown system system /sys/class/leds/red/lut_pwm
+    chown system system /sys/class/leds/red/step_duration
+    chown system system /sys/class/leds/red/pause_lo_multi
+    chown system system /sys/class/leds/red/pause_hi_multi
+    chown system system /sys/class/leds/red/max_single_brightness
+    chown system system /sys/class/leds/red/max_mix_brightness
+    chown system system /sys/class/leds/green/brightness
+    chown system system /sys/class/leds/green/lut_pwm
+    chown system system /sys/class/leds/green/step_duration
+    chown system system /sys/class/leds/green/pause_lo_multi
+    chown system system /sys/class/leds/green/pause_hi_multi
+    chown system system /sys/class/leds/green/max_single_brightness
+    chown system system /sys/class/leds/green/max_mix_brightness
+    chown system system /sys/class/leds/blue/brightness
+    chown system system /sys/class/leds/blue/lut_pwm
+    chown system system /sys/class/leds/blue/step_duration
+    chown system system /sys/class/leds/blue/pause_lo_multi
+    chown system system /sys/class/leds/blue/pause_hi_multi
+    chown system system /sys/class/leds/blue/max_single_brightness
+    chown system system /sys/class/leds/blue/max_mix_brightness
+
+    # System setting access from white balance app into fb.
+    chown system graphics /dev/graphics/fb0
+    chown system graphics /dev/graphics/fb1
+    chown system graphics /dev/graphics/fb2
+
+    # Transfer sensor json files
+    chown system system /mnt/vendor/persist/sensors
+    exec u:r:qti_init_shell:s0 system -- /vendor/bin/sensor_json_transfer.sh
+
+    # Update dm-verity state and set partition.*.verified properties
+    verity_update_state
+
+on post-fs-data
+# Charger
+    # power_supply sysfs
+    chmod 0664 /sys/class/power_supply/battery/charging_enabled
+    chmod 0664 /sys/class/power_supply/battery/lrc_socmax
+    chmod 0664 /sys/class/power_supply/battery/lrc_socmin
+    chmod 0664 /sys/class/power_supply/battery/lrc_enable
+    chmod 0664 /sys/class/power_supply/battery/system_temp_level
+    chmod 0664 /sys/class/power_supply/battery/uevent
+    chmod 0664 /sys/class/power_supply/battery/running_status
+    chmod 0664 /sys/class/power_supply/battery/device/enable_shutdown_at_low_battery
+    chmod 0664 /sys/class/power_supply/bms/charge_full
+    chmod 0664 /sys/class/power_supply/bms/batt_aging_level
+
+    # SONY: creat mount point for qns
+    mkdir /mnt/qns 0750 oem_2985 oem_2985
+    wait /dev/block/bootdevice/by-name/Qnovo
+    mount_all /vendor/etc/qns.fstab
+
+    # SONY: setup qns partition
+    chown oem_2985 oem_2985 /mnt/qns
+    chmod 0750 /mnt/qns
+    restorecon_recursive /mnt/qns
+
+    # qns
+    chown oem_2985 oem_2985 /sys/class/qns
+    chown oem_2985 oem_2985 /sys/class/qns/alarm
+    chown oem_2985 oem_2985 /sys/class/qns/charge_current
+    chown oem_2985 oem_2985 /sys/class/qns/charge_voltage
+    chown oem_2985 oem_2985 /sys/class/qns/charging_state
+    chown oem_2985 oem_2985 /sys/class/qns/current_now
+    chown oem_2985 oem_2985 /sys/class/qns/design
+    chown oem_2985 oem_2985 /sys/class/qns/fcc
+    chown oem_2985 oem_2985 /sys/class/qns/options
+    chown oem_2985 oem_2985 /sys/class/qns/soc
+    chown oem_2985 oem_2985 /sys/class/qns/temp
+    chown oem_2985 oem_2985 /sys/class/qns/voltage
+    chown oem_2985 oem_2985 /sys/class/qns/battery_type
+    start qns
+
+    # The charge_service/chargemon/hvdcp_opti use wakelock before on boot, so add permission here.
+    chown radio wakelock /sys/power/wake_lock
+    chown radio wakelock /sys/power/wake_unlock
+    chmod 0660 /sys/power/wake_lock
+    chmod 0660 /sys/power/wake_unlock
+
+    # chargemon use brightness and autosleep before on boot, so add permission here.
+    chown system system /sys/class/backlight/panel0-backlight/brightness
+    chown system system /sys/power/autosleep
+
+    # hvdcp_opti
+    start vendor.hvdcp_opti
+
+    # charge_service
+    
+    start charge_service
+
+    # Set USB mode to MSC for SDP charging
+    write /config/usb_gadget/g1/os_desc/use 0
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration mass_storage
+    write /config/usb_gadget/g1/idProduct 0xeeee
+    write /config/usb_gadget/g1/idVendor 0x0fce
+    symlink /config/usb_gadget/g1/functions/mass_storage.0 /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+
+    # chargemon
+    # Add oem_2993 to the group of chargemon for access MiscTA.
+    # Add wakelock to the group of chargemon for access "/sys/power/wake_lock" and "/sys/power/wake_unlock".
+    # Add input to the group of chargemon for access "/dev/input/event"
+    exec - system system root oem_2993 wakelock input -- /vendor/bin/chargemon
+    exec - root root -- /vendor/bin/chargemon_shutdown
+
+    # enable os_desc after chargemon
+    write /config/usb_gadget/g1/os_desc/use 1
+
+    # create directory for widevine
+    mkdir /data/vendor/wv 0700 media media
+
+    # Create directory for font change support
+    exec u:r:font_selector_make_dir:s0 system -- /system/bin/font-selector-make-dir.sh
+
+# Fingerprint data folder
+    mkdir /data/vendor/fpc 0770 system system
+
+    # SONY: Camera
+    chown cameraserver camera /dev/sony_camera0
+    chmod 0770 /dev/sony_camera0
+    chown cameraserver camera /dev/sony_camera1
+    chmod 0770 /dev/sony_camera1
+    mkdir /data/vendor/camera 0770 cameraserver camera
+
+    # Camera flash
+    chown cameraserver camera /sys/class/leds/led:flash_0/brightness
+    chown cameraserver camera /sys/class/leds/led:flash_1/brightness
+    chown cameraserver camera /sys/class/leds/led:flash_0/max_brightness
+    chown cameraserver camera /sys/class/leds/led:flash_1/max_brightness
+    chown cameraserver camera /sys/class/leds/led:flash_0/ires_ua
+    chown cameraserver camera /sys/class/leds/led:flash_1/ires_ua
+    chown cameraserver camera /sys/class/leds/led:flash_0/strobe
+    chown cameraserver camera /sys/class/leds/led:flash_1/strobe
+    chown cameraserver camera /sys/class/leds/led:flash_0/duration
+    chown cameraserver camera /sys/class/leds/led:flash_1/duration
+    chown cameraserver camera /sys/class/leds/led:torch_0/brightness
+    chown cameraserver camera /sys/class/leds/led:torch_1/brightness
+    chown cameraserver camera /sys/class/leds/led:torch_0/max_brightness
+    chown cameraserver camera /sys/class/leds/led:torch_1/max_brightness
+    chown cameraserver camera /sys/class/leds/led:torch_0/ires_ua
+    chown cameraserver camera /sys/class/leds/led:torch_1/ires_ua
+    chown cameraserver camera /sys/class/leds/led:switch_0/brightness
+    chown cameraserver camera /sys/class/leds/led:switch_0/fault_status
+
+    # Tof sensor
+    chown cameraserver camera /dev/i2c-3
+    chmod 666 /dev/i2c-3
+    chown cameraserver camera /sys/devices/virtual/input/tof_sensor/tof_power_ctl
+    chmod 666 /sys/devices/virtual/input/tof_sensor/tof_power_ctl
+
+    # RGBC-IR sensor
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_Itime
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_all
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_auto_gain
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_blue
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_channel
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_clear
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_gain
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_green
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_persist
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_power_state
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_red
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_thres
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/als_thresh_deltaP
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/chip_id
+    chown cameraserver camera /sys/devices/virtual/input/rgbcir_sensor/chip_pow
+
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_Itime
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_auto_gain
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_channel
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_gain
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_persist
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_power_state
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_thres
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/als_thresh_deltaP
+    chmod 666 /sys/devices/virtual/input/rgbcir_sensor/chip_pow
+
+# create directory for wfd
+    mkdir /data/vendor/wfd 0770 system system
+
+# Haptics vibrator
+    chown system system /sys/class/leds/vibrator/play_mode
+    chown system system /sys/class/leds/vibrator/vmax_mv
+    chown system system /sys/class/leds/vibrator/wf_samp
+    chown system system /sys/class/leds/vibrator/wf_rep_count
+    chown system system /sys/class/leds/vibrator/wf_s_rep_count
+    chown system system /sys/class/leds/vibrator/lra_auto_mode
+
+on property:vendor.fingerprint.hwid=0711
+    setprop vendor.fingerprint.ready true
+    start fps_hal
+
+on property:ro.boot.verifiedbootstate=orange
+    setprop persist.service.adb.enable 1
+
+# Shutdown notification for ChargeService
+on property:sys.shutdown.requested=*
+    write /sys/class/power_supply/battery/running_status 2
+    write /sys/class/power_supply/battery/uevent change
+
+# Set value in property to sysfs for LRC mode
+on property:vendor.battery.charge.osv.init=1
+    setprop persist.vendor.battery.charge ${persist.service.battery.charge}
+
+on property:persist.vendor.battery.charge=0
+    write /sys/class/power_supply/battery/lrc_enable 0
+    write /sys/class/power_supply/battery/lrc_socmax 0
+    write /sys/class/power_supply/battery/lrc_socmin 0
+
+on property:persist.vendor.battery.charge=1
+    write /sys/class/power_supply/battery/lrc_socmax 60
+    write /sys/class/power_supply/battery/lrc_socmin 40
+    write /sys/class/power_supply/battery/lrc_enable 1
+
+# Set value in property to sysfs for SmartCharge
+on property:persist.vendor.battery.smt_chg=activate
+    write /sys/class/power_supply/battery/smart_charging_activation 1
+
+on property:persist.vendor.battery.smt_chg=charging_suspend
+    write /sys/class/power_supply/battery/smart_charging_interruption 1
+
+on property:persist.vendor.battery.smt_chg=charging_resume
+    write /sys/class/power_supply/battery/smart_charging_interruption 0
+
+# bugreport is triggered by holding down volume down, volume up and power
+service bugreport /system/bin/dumpstate -d -p -B -z \
+        -o /data/user_de/0/com.android.shell/files/bugreports/bugreport
+    class main
+    disabled
+    oneshot
+    keycodes 114 115 116
+
+on boot
+    write /proc/sys/vm/dirty_ratio 5
+    write /proc/sys/vm/dirty_background_ratio 1
+
+# Charge service
+service charge_service /vendor/bin/charge_service
+    user system
+    # Add oem_2993 to the group of charge_service for access MiscTA.
+    # Add wakelock to the group of charge_service for access "/sys/power/wake_lock" and "/sys/power/wake_unlock".
+    group system root oem_2993 wakelock
+    disabled
+
+    # For reducing CPU loads, charge service runs as system-background process.
+    writepid /dev/cpuset/system-background/tasks
+
+on property:sys.user.0.ce_available=true
+    # Remounting partitions here just in case vold restarts
+    mount_all /vendor/etc/qns.fstab
+
+# qns
+service qns /vendor/bin/qns -d /mnt/qns -l /mnt/qns
+    user oem_2985
+    group oem_2985
+    socket qnsbsd stream 660 oem_2985 system
+    disabled
+
+# DRM widevine
+service wvkbd_installer /vendor/bin/wvkbd
+    class late_start
+    user system
+    group system
+    oneshot
+
+on boot
+    # NFC local data and storage
+    mkdir /data/vendor/nfc 0770 nfc nfc
+    mkdir /data/vendor/nfc/param 0770 nfc nfc

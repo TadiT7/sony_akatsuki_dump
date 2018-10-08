@@ -1,0 +1,9 @@
+# Copyright (C) 2018 Sony Mobile Communications Inc.
+# All rights, including trade secret rights, reserved.
+#
+# This script executes a shell script that copy preloaded
+# applications setting to folder Update Center can read if
+# the setting has not already been copied.
+
+on post-fs-data
+    exec - root cache -- /system/bin/preloads_settings_copy.sh

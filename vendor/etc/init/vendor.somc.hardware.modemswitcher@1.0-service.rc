@@ -1,0 +1,5 @@
+# Modem-switcher service
+service vendor.somc.hardware.modemswitcher-1-0 /vendor/bin/hw/vendor.somc.hardware.modemswitcher@1.0-service
+    class hal
+    user root
+    group root system
